@@ -1,0 +1,35 @@
+{
+  "name": "at-test-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "author": "Sergii Soroka",
+  "scripts": {
+    "start": "vite",
+    "serve": "json-server --watch --port 3000 db.json",
+    "dev": "concurrently \"npm run serve\" \"npm run start\"",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
+    "element-plus": "^2.3.4",
+    "pinia": "^2.1.1",
+    "vue": "^3.2.47",
+    "vue-plyr": "^7.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/node": "^18.11.18",
+    "@vitejs/plugin-vue": "^4.1.0",
+    "autoprefixer": "^10.4.14",
+    "concurrently": "^8.0.1",
+    "json-server": "^0.17.3",
+    "postcss": "^8.4.23",
+    "sass": "^1.32.12",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.2",
+    "vue-tsc": "^1.4.2"
+  }
+}

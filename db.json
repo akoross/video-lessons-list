@@ -1,0 +1,40 @@
+{
+  "lessons": [
+    {
+      "id": 1,
+      "title": "test-1",
+      "subtitle": "subtitle 1",
+      "video_url": "https://www.youtube.com/embed/v4qymvKaWaA",
+      "video_time": 18.28,
+      "description": "test-1 description",
+      "watched": true
+    },
+    {
+      "id": 2,
+      "title": "test-2",
+      "subtitle": "subtitle 2",
+      "video_url": "https://www.youtube.com/embed/FIjXrN8w6_k",
+      "video_time": 60,
+      "description": "test-2 description",
+      "watched": false
+    },
+    {
+      "id": 3,
+      "title": "test-3",
+      "subtitle": "subtitle 3",
+      "video_url": "https://www.youtube.com/embed/kISLReswjco",
+      "video_time": 60,
+      "description": "test-3 description",
+      "watched": false
+    },
+    {
+      "id": 4,
+      "title": "test-4",
+      "subtitle": "subtitle 4",
+      "video_url": "https://www.youtube.com/embed/Vrj5ZE5yiBo",
+      "video_time": 60,
+      "description": "test-4 description",
+      "watched": false
+    }
+  ]
+}
