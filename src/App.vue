@@ -1,38 +1,77 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, watch } from 'vue';
+import { YoutubeVue3 } from 'youtube-vue3';
 
 import { useLessonsStore, LesssonInterface } from './stores/lessonsStore';
-import { onMounted } from 'vue';
 
 const store = useLessonsStore();
 const lessons = ref<LesssonInterface[]>([]);
 const lessonActive = ref<LesssonInterface>();
-const playerContainer = ref<HTMLElement>();
-const timer = ref(0);
-
-const plyr = ref();
-
-onMounted(() => {
-  plyr.value.player.on('statechange', (e) => {
-    console.log(e);
-  });
-});
-
-// watch(player, ()=>{ console.log(player)})
+const youtube = ref();
+const seconds = ref(0);
+const activateButton = ref(true);
+const videoId = ref('');
+const alertShow = ref(false);
+let timerInterval: any;
 
 onBeforeMount(async () => {
   await store.allLessons();
   lessons.value = store.lessons;
-  lessonActive.value = lessons.value[0];
+  lessonActive.value = lessons.value[store.lessonActive];
+  videoId.value = lessonActive.value.video_url.split('/').slice(-1).join();
 });
 
-function lessonChoise(lesson: LesssonInterface) {
-  const id: number = lesson.id;
-  lessonActive.value = lessons.value[id - 1];
+watch(seconds, (oldSec, newSec: number) => {
+  if (newSec >= lessonActive.value?.video_time * 60) {
+    stopTimer();
+    seconds.value = 0;
+    activateButton.value = false;
+    alertShow.value = true;
+  }
+});
+
+function startTimer() {
+  timerInterval = setInterval(
+    updateTimer,
+    lessonActive.value?.video_time * 60 - seconds.value
+  );
 }
 
-function playHandler() {
-  console.log('sdfsdf');
+function updateTimer() {
+  seconds.value++;
+}
+
+function stopTimer() {
+  clearInterval(timerInterval); // Stop the timer
+}
+
+function onPaused() {
+  stopTimer();
+}
+function onPlayed() {
+  startTimer();
+  updateTimer();
+}
+
+function onEnded() {
+  stopTimer();
+  seconds.value = seconds.value;
+  activateButton.value = false;
+  alertShow.value = true;
+}
+
+function nextVideo() {
+  if (store.getLessonActive === lessons.value.length - 1) {
+    return;
+  }
+
+  activateButton.value = true;
+  seconds.value = 0;
+  store.changeLessonActive();
+  alertShow.value = false;
+
+  lessonActive.value = lessons.value[store.getLessonActive];
+  videoId.value = lessonActive.value.video_url.split('/').slice(-1).join();
 }
 </script>
 
@@ -61,17 +100,17 @@ function playHandler() {
                 {{ lessonActive?.title }}
               </h2>
               <div class="w-full">
-              <vue-plyr ref="plyr">
-                <div class="plyr__video-embed w-full">
-                  <iframe
-                    :src="lessonActive?.video_url"
-                    frameborder="0"
-                    allow="accelerometer; gyroscope; picture-in-picture"
-                    allowfullscreen
-                  ></iframe>
+                <div class="w-full">
+                  <YoutubeVue3
+                    class="w-full"
+                    ref="youtube"
+                    :videoid="videoId"
+                    @ended="onEnded"
+                    @paused="onPaused"
+                    @played="onPlayed"
+                  />
                 </div>
-              </vue-plyr>
-            </div>
+              </div>
               <h2 class="lesson-subTitle text-xl">
                 {{ lessonActive?.subtitle }}
               </h2>
@@ -83,32 +122,38 @@ function playHandler() {
         </el-main>
         <el-aside class="flex flex-col justify-between" width="250px">
           <div class="memu p-5 flex flex-col m-0 gag-0">
-            <button
-              class="bg-[#b4c1cc] justify-start items-center text-lg cursor-pointer flex p-0 m-0 w-full border-0 gap-0"
+            <div
+              class="bg-[#b4c1cc] justify-start items-center text-lg flex p-0 m-0 w-full border-0 gap-0"
               :class="{
-                'bg-[#ff5c01]': lesson.id === lessonActive?.id,
-                'hover:bg-[#ff5c01]': lesson.watched,
+                'bg-[#ff5c01]': idx === store.getLessonActive,
               }"
-              v-for="lesson in lessons"
+              v-for="(lesson, idx) in lessons"
               :key="lesson.id"
-              @click="lessonChoise(lesson)"
-              :disabled="!lesson.watched"
             >
               <el-icon class="text-3xl h-20 w-20 justify-center m-0 p-0"
                 ><VideoPlay
               /></el-icon>
               <el-text class="m-0 text-xl">{{ lesson.title }}</el-text>
-            </button>
+            </div>
           </div>
-          <el-footer class="flex flex-col h-auto pt-5 pb-5">
+          <el-footer class="flex flex-col h-auto pt-5 pb-5 gap-3">
             <el-text>Вже переглянули? Отримайте доступ до наступного</el-text>
 
-            <el-button>Наступний епізод</el-button>
+            <el-button :disabled="activateButton" @click="nextVideo"
+              >Наступний епізод</el-button
+            >
           </el-footer>
         </el-aside>
       </el-container>
     </el-container>
   </div>
+  <el-alert
+    class="absolute top-0 w-fit p-5 ps-10 pe-10 end-0"
+    v-if="alertShow"
+    title="Ви можите переглянути наступне відео"
+    type="success"
+    show-icon
+  />
 </template>
 
 <style scoped>
